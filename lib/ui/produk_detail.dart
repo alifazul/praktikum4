@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
  import 'package:praktikum_crud_flutter/model/produk.dart';
  import 'package:praktikum_crud_flutter/ui/produk_form.dart';
+ import 'package:praktikum_crud_flutter/bloc/produk_bloc.dart';
+ import 'package:praktikum_crud_flutter/ui/produk_page.dart';
 
  class ProdukDetail extends StatefulWidget {
  Produk? produk;
@@ -62,23 +64,29 @@ Text(
  );
  }
 
- void confirmHapus() {
- AlertDialog alertDialog = AlertDialog(
- content: const Text("Yakin ingin menghapus data ini?"),
- actions: [
- //tombol hapus
- OutlinedButton(
- child: const Text("Ya"),
- onPressed: () {},
- ),
- //tombol batal
- OutlinedButton(
- child: const Text("Batal"),
- onPressed: () => Navigator.pop(context),
- )
- ],
- );
+  void confirmHapus() {
+    AlertDialog alertDialog = AlertDialog(
+      content: const Text("Yakin ingin menghapus data ini?"),
+      actions: [
+        OutlinedButton(
+          child: const Text("Ya"),
+          onPressed: () async {
+            try {
+              await ProdukBloc.deleteProduk(id: widget.produk?.id);
+              Navigator.pushReplacement(
+                  context, MaterialPageRoute(builder: (context) => const ProdukPage()));
+            } catch (e) {
+              print(e);
+            }
+          },
+        ),
+        OutlinedButton(
+          child: const Text("Batal"),
+          onPressed: () => Navigator.pop(context),
+        )
+      ],
+    );
 
- showDialog(builder: (context) => alertDialog, context: context);
- }
+    showDialog(builder: (context) => alertDialog, context: context);
+  }
  }

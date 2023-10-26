@@ -1,5 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:praktikum_crud_flutter/ui/registrasi_page.dart';
+import 'package:praktikum_crud_flutter/widget/success_dialog.dart';
+import 'package:praktikum_crud_flutter/widget/warning_dialog.dart';
+import 'package:praktikum_crud_flutter/ui/produk_page.dart';
+import 'package:praktikum_crud_flutter/helpers/user_info.dart';
+import 'package:praktikum_crud_flutter/bloc/login_bloc.dart';
 
  class LoginPage extends StatefulWidget {
  const LoginPage({Key? key}) : super(key: key);
@@ -76,12 +81,42 @@ import 'package:praktikum_crud_flutter/ui/registrasi_page.dart';
  );
  }
 
- //Membuat Tombol Login
+//Membuat Tombol Login
  Widget _buttonLogin() {
  return ElevatedButton(
  child: const Text("Login"),
  onPressed: () {
  var validate = _formKey.currentState!.validate();
+ if (validate) {
+ if (!_isLoading) _submit();
+ }
+ });
+ }
+
+ void _submit() {
+ _formKey.currentState!.save();
+ setState(() {
+ _isLoading = true;
+});
+ LoginBloc.login(
+ email: _emailTextboxController.text,
+ password: _passwordTextboxController.text)
+ .then((value) async {
+ await UserInfo().setToken(value.token.toString());
+ await UserInfo().setUserID(int.parse(value.userID.toString()));
+ Navigator.pushReplacement(
+ context, MaterialPageRoute(builder: (context) => const ProdukPage()));
+ }, onError: (error) {
+print(error);
+ showDialog(
+ context: context,
+ barrierDismissible: false,
+ builder: (BuildContext context) => const WarningDialog(
+ description: "Login gagal, silahkan coba lagi",
+ ));
+ });
+ setState(() {
+ _isLoading = false;
  });
  }
 

@@ -1,4 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:praktikum_crud_flutter/bloc/registrasi_bloc.dart';
+import 'package:praktikum_crud_flutter/widget/success_dialog.dart';
+import 'package:praktikum_crud_flutter/widget/warning_dialog.dart';
 
  class RegistrasiPage extends StatefulWidget {
     const RegistrasiPage({Key? key}) : super(key: key);
@@ -69,7 +72,7 @@ import 'package:flutter/material.dart';
           return 'Email harus diisi';
           }
         //validasi email
-        Pattern pattern = r'^(([^<>()[\]\\.,;:\s@\"]+(\.[^<>()[\]\\.,;:\s@\"]+)*)|(\".+\"))@((\[[0 -9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$';
+        Pattern pattern = r'^(([^<>()[\]\\.,;:\s@\"]+(\.[^<>()[\]\\.,;:\s@\"]+)*)|(\".+\"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$';
         RegExp regex = RegExp(pattern.toString());
         if (!regex.hasMatch(value)) {
         return "Email tidak valid";
@@ -118,6 +121,41 @@ import 'package:flutter/material.dart';
         child: const Text("Registrasi"),
         onPressed: () {
         var validate = _formKey.currentState!.validate();
+        if(validate){
+          if(!_isLoading)_submit();
+        }
        });
     }
+
+void _submit() {
+ _formKey.currentState!.save();
+ setState(() {
+ _isLoading = true;
+ });
+ RegistrasiBloc.registrasi(
+ nama: _namaTextboxController.text,
+ email: _emailTextboxController.text,
+ password: _passwordTextboxController.text)
+ .then((value) {
+ showDialog(
+ context: context,
+ barrierDismissible: false,
+ builder: (BuildContext context) => SuccessDialog(
+ description: "Registrasi berhasil, silahkan login",
+ okClick: () {
+ Navigator.pop(context);
+ },
+ ));
+ }, onError: (error) {
+ showDialog(
+ context: context,
+ barrierDismissible: false,
+ builder: (BuildContext context) => const WarningDialog(
+ description: "Registrasi gagal, silahkan coba lagi",
+ ));
+ });
+ setState(() {
+ _isLoading = false;
+ });
+ }
  }
